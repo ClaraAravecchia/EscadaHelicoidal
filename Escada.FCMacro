@@ -1,0 +1,48 @@
+import Part
+import FreeCAD
+import FreeCADGui
+import Draft
+import math as m
+
+"""
+Desenvolvido por Ana Clara Aravecchia
+Desenha os degraus uma escada helicoidal, que depois necessitam de extrusao
+"""
+def escada(r, qntidade_cir, tam_deg, qntidade_deg, alt_deg):
+	alpha= (2*m.pi)/qntidade_deg
+	P=[]
+
+	# Tamanho da circunferencia interna
+	meio=(2*r) - tam_deg
+	for n in range(1, (qntidade_deg*qntidade_cir)+1):
+		# Para evitar o erro <type 'exceptions.IndexError'>: list index out of range
+		try:
+			# Vetor da Circunferencia Interna 
+			P.append(FreeCAD.Vector(meio*m.cos(n*alpha), (meio*m.sin(n*alpha)), (alt_deg*n)))
+	
+			# Vetor da Circunferencia Externa	
+			P.append(FreeCAD.Vector(r*m.cos(n*alpha), (r*m.sin(n*alpha)), (alt_deg*n)))
+			
+			# Vetor da Circunferencia Interna   p2
+			P.append(FreeCAD.Vector(meio*m.cos((n+1)*alpha), (meio*m.sin((n+1)*alpha)), (alt_deg*n)))
+	
+			# Vetor da Circunferencia Externa	  p2	
+			P.append(FreeCAD.Vector(r*m.cos((n+1)*alpha), (r*m.sin((n+1)*alpha)), (alt_deg*n)))
+		except IndexError: pass
+	for i in range(0, len(P)+1, 4):
+		T=[]
+		
+		# Para evitar o erro <type 'exceptions.IndexError'>: list index out of range
+		try:
+			T.extend ([ P[i], P[i+1], P[i+3], P[i+2],])
+			Draft.makeWire(T, closed=True, face=False, support=None)
+		except IndexError: pass
+	print "*"*50
+
+#	td em cm --------------------------------------------
+#	r	==	raio
+#	qntidade_cir	==	qntidade de circunferencias
+#	tam_deg	==	tamanho do degrau
+#	qntidade_deg	==	qntidade de degraus por circunferencia
+#	alt_deg	==	altura do degrau	
+escada(300, 2, 150, 24, 15)
